@@ -165,11 +165,20 @@ def create_autogen_model_client(
             structured_output=False,
         )
         
-        reasoning_client = False # True to help with debugging
-        if reasoning_client:
-            from charge.clients.reasoning import ReasoningCaptureClient
+        # Enable debug client to verify vLLM modifications (reasoning -> content copy)
+        debug_client = os.getenv("VLLM_DEBUG", "true").lower() in ["true", "1", "yes"]
+        
+        if debug_client:
+            from charge.clients.debug_vllm_client import RawVLLMResponseCapture
             
-            model_client = ReasoningCaptureClient(
+            logger.info("="*100)
+            logger.info("DEBUG MODE ENABLED: Using RawVLLMResponseCapture client")
+            logger.info(f"   vLLM URL: {vllm_url}")
+            logger.info(f"   Model: {vllm_model}")
+            logger.info(f"   Reasoning effort: {reasoning_effort}")
+            logger.info("="*100 + "\n")
+            
+            model_client = RawVLLMResponseCapture(
                 model=vllm_model,
                 api_key="EMPTY",
                 base_url=vllm_url,
@@ -178,11 +187,11 @@ def create_autogen_model_client(
                 extra_body={
                     "reasoning_effort": reasoning_effort,
                     "max_tokens": max_tokens,
-                    },
+                },
             )
         else:
             from autogen_ext.models.openai import OpenAIChatCompletionClient
-            # Use OpenAIChatCompletionClient
+            # Use standard OpenAIChatCompletionClient
             model_client = OpenAIChatCompletionClient(
                 model=vllm_model,
                 api_key="EMPTY",
@@ -192,7 +201,7 @@ def create_autogen_model_client(
                 extra_body={
                     "reasoning_effort": reasoning_effort,
                     "max_tokens": max_tokens,
-                    },
+                },
             )
     else:
         if api_key is None:

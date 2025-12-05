@@ -66,7 +66,13 @@ class ReasoningModelContext(UnboundedChatCompletionContext):
                 hasattr(assistant_message, "thought")
                 and assistant_message.thought is not None
             ):
-                print(f"Model thought: {assistant_message.thought}")
+                print("\n" + "="*100)
+                print("REASONING CONTENT (from vLLM)")
+                print("="*100)
+                # Remove extra newlines from reasoning content
+                thought_content = str(assistant_message.thought).strip()
+                print(thought_content)
+                print("="*100 + "\n")
             else:
                 print("Model: ", assistant_message.content)
 
@@ -78,7 +84,13 @@ def thoughts_callback(assistant_message):
     elif assistant_message.type == "AssistantMessage":
 
         if assistant_message.thought is not None:
-            print(f"Model thought: {assistant_message.thought}")
+            print("\n" + "="*100)
+            print("REASONING CONTENT (from vLLM)")
+            print("="*100)
+            # Remove extra newlines from reasoning content
+            thought_content = str(assistant_message.thought).strip()
+            print(thought_content)
+            print("="*100 + "\n")
         if isinstance(assistant_message.content, list):
             for item in assistant_message.content:
                 if hasattr(item, "name") and hasattr(item, "arguments"):
